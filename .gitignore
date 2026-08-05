@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# Build outputs
+dist/
+build/
+
+# Local database store
+backend/data/
+*.db
+*.sqlite
+
+# IDE & System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -29,7 +29,10 @@ export default function Login({ onLoginSuccess }) {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Authentication failed. Please verify credentials.');
+      console.error('Authentication Error:', err);
+      const serverError = err.response?.data?.error;
+      const networkError = err.message ? `Network Error: ${err.message}` : null;
+      setError(serverError || networkError || 'Authentication failed. Please verify backend URL and credentials.');
     } finally {
       setLoading(false);
     }

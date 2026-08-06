@@ -1,0 +1,9 @@
+{
+  "name": "opspulse-ai-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build:frontend": "cd opspulse-ai/frontend && npm install && npm run build",
+    "build:backend": "cd opspulse-ai/backend && npm install"
+  }
+}

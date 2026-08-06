@@ -1,31 +1,14 @@
 # Secret Credentials & Environment Files
 .env
 .env.local
-.env.development
 .env.production
 .env*.local
-*.env
 
 # Keep template examples unignored
 !.env.example
 
 # Dependencies
 node_modules/
-package-lock.json
 
 # Build Outputs
 dist/
-build/
-out/
-
-# Database & Persistent Data
-backend/data/
-*.db
-*.sqlite
-db_store.json
-
-# IDE & System Files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/

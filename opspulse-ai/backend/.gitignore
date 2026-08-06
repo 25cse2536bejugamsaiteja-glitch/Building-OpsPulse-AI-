@@ -1,10 +1,8 @@
 # Secret Credentials & Environment Files
 .env
 .env.local
-.env.development
 .env.production
 .env*.local
-*.env
 
 # Keep template examples unignored
 !.env.example
@@ -12,9 +10,6 @@
 # Dependencies
 node_modules/
 
-# Build Outputs
-dist/
-
 # Local Data
-backend/data/
+data/
 db_store.json

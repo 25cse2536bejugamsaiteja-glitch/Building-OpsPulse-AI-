@@ -7,11 +7,13 @@ import {
   Building2, ArrowRight, RefreshCw, AlertTriangle
 } from 'lucide-react';
 
+import { DEFAULT_DEMO_INVENTORY } from '../utils/demoData';
+
 export default function AgentRunner() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [skuList, setSkuList] = useState([]);
+  const [skuList, setSkuList] = useState(DEFAULT_DEMO_INVENTORY);
   const [selectedSku, setSelectedSku] = useState(location.state?.selectedSku || 'SKU-102');
   const [customTrigger, setCustomTrigger] = useState('Stock level critically low. Reorder required immediately.');
   const [isRunning, setIsRunning] = useState(false);
@@ -23,13 +25,16 @@ export default function AgentRunner() {
   // Fetch SKU list
   useEffect(() => {
     api.get('/inventory').then((res) => {
-      if (res.data.success) {
+      if (res.data?.success && res.data?.items?.length > 0) {
         setSkuList(res.data.items);
         if (!selectedSku && res.data.items.length > 0) {
           setSelectedSku(res.data.items[0].sku);
         }
       }
-    }).catch(err => console.error(err));
+    }).catch(err => {
+      console.warn('Using default demo SKU list:', err.message);
+      setSkuList(DEFAULT_DEMO_INVENTORY);
+    });
   }, []);
 
   // Poll logs when activeRunId is set

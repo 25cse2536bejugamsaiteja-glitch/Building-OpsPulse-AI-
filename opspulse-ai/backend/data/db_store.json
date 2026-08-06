@@ -18,11 +18,11 @@
       "sku": "SKU-104",
       "name": "USB-C Fast Charging Hub (7-in-1)",
       "category": "Accessories",
-      "stock_level": 28,
+      "stock_level": 200,
       "reorder_point": 50,
       "target_stock": 200,
       "unit_cost": 18.5,
-      "status": "LOW",
+      "status": "HEALTHY",
       "updated_at": "2026-08-06T10:40:00.000Z"
     },
     {
@@ -30,11 +30,11 @@
       "sku": "SKU-205",
       "name": "Ultra-Wide 34\" Monitor Arm",
       "category": "Furniture",
-      "stock_level": 8,
+      "stock_level": 60,
       "reorder_point": 15,
       "target_stock": 60,
       "unit_cost": 85,
-      "status": "CRITICAL",
+      "status": "HEALTHY",
       "updated_at": "2026-08-06T10:40:00.000Z"
     },
     {

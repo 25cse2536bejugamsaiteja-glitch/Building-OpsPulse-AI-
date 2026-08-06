@@ -3,14 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import MetricCard from '../components/MetricCard';
 import { 
+  DEFAULT_DEMO_INVENTORY, 
+  DEFAULT_DEMO_SUPPLIERS, 
+  DEFAULT_DEMO_POS 
+} from '../utils/demoData';
+import { 
   Package, AlertTriangle, ShoppingCart, Activity, RefreshCw, 
   ArrowUpRight, Truck, Zap, Search, Play, CheckCircle, Clock
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const [inventory, setInventory] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [inventory, setInventory] = useState(DEFAULT_DEMO_INVENTORY);
+  const [suppliers, setSuppliers] = useState(DEFAULT_DEMO_SUPPLIERS);
+  const [purchaseOrders, setPurchaseOrders] = useState(DEFAULT_DEMO_POS);
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,11 +30,28 @@ export default function Dashboard() {
         api.get('/purchase-orders')
       ]);
 
-      if (invRes.data.success) setInventory(invRes.data.items);
-      if (supRes.data.success) setSuppliers(supRes.data.suppliers);
-      if (poRes.data.success) setPurchaseOrders(poRes.data.purchaseOrders);
+      if (invRes.data?.success && invRes.data?.items?.length > 0) {
+        setInventory(invRes.data.items);
+      } else {
+        setInventory(DEFAULT_DEMO_INVENTORY);
+      }
+
+      if (supRes.data?.success && supRes.data?.suppliers?.length > 0) {
+        setSuppliers(supRes.data.suppliers);
+      } else {
+        setSuppliers(DEFAULT_DEMO_SUPPLIERS);
+      }
+
+      if (poRes.data?.success && poRes.data?.purchaseOrders?.length > 0) {
+        setPurchaseOrders(poRes.data.purchaseOrders);
+      } else {
+        setPurchaseOrders(DEFAULT_DEMO_POS);
+      }
     } catch (err) {
-      console.error('Failed to load dashboard telemetry:', err);
+      console.warn('Failed to load live server telemetry, using deterministic demo dataset fallback:', err.message);
+      setInventory(DEFAULT_DEMO_INVENTORY);
+      setSuppliers(DEFAULT_DEMO_SUPPLIERS);
+      setPurchaseOrders(DEFAULT_DEMO_POS);
     } finally {
       setLoading(false);
     }

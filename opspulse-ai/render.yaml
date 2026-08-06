@@ -3,8 +3,9 @@ services:
   - type: web
     name: opspulse-ai-frontend
     env: static
-    buildCommand: cd opspulse-ai/frontend && npm install && npm run build
-    staticPublishPath: ./opspulse-ai/frontend/dist
+    rootDir: opspulse-ai/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_BASE_URL
         value: https://opspulse-ai-backend.onrender.com/api
@@ -19,8 +20,9 @@ services:
   - type: web
     name: opspulse-ai-backend
     env: node
-    buildCommand: cd opspulse-ai/backend && npm install
-    startCommand: cd opspulse-ai/backend && node src/server.js
+    rootDir: opspulse-ai/backend
+    buildCommand: npm install
+    startCommand: node src/server.js
     envVars:
       - key: PORT
         value: 10000

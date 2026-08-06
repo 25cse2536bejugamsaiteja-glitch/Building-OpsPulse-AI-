@@ -202,7 +202,7 @@ export default function AgentRunner() {
             <div className="glass-card rounded-2xl p-5 border border-emerald-500/30 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> PO GENERATED
+                  <CheckCircle2 className="w-4 h-4" /> PO GENERATED & DISPATCHED
                 </span>
                 <span className="text-xs font-mono font-bold text-amber-400">{agentResult.po.po_number}</span>
               </div>
@@ -224,6 +224,29 @@ export default function AgentRunner() {
                   <span className="text-slate-300">Total Commitment:</span>
                   <span className="text-emerald-400">${agentResult.po.total_cost.toFixed(2)}</span>
                 </div>
+              </div>
+
+              <div className="pt-2 flex gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      await api.post('/inventory/fulfill', { sku: selectedSku });
+                      navigate('/dashboard');
+                    } catch (err) {
+                      console.error('Fulfill error:', err);
+                    }
+                  }}
+                  className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:opacity-90 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-emerald-900/30"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Receive & Replenish Stock</span>
+                </button>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold"
+                >
+                  Dashboard
+                </button>
               </div>
             </div>
           )}

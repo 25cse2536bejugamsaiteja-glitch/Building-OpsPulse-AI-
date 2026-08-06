@@ -64,6 +64,52 @@ router.get('/purchase-orders', authenticateToken, (req, res) => {
   }
 });
 
+// Fulfill/Receive stock for a reordered SKU
+router.post('/inventory/fulfill', authenticateToken, (req, res) => {
+  try {
+    const { sku, id } = req.body;
+    let item = null;
+
+    if (db) {
+      if (sku) item = db.prepare('SELECT * FROM inventory WHERE sku = ?').get(sku);
+      if (!item && id) item = db.prepare('SELECT * FROM inventory WHERE id = ?').get(id);
+    } else {
+      item = memoryStore.inventory.find(i => (sku && i.sku === sku) || (id && i.id === id));
+    }
+
+    if (!item) {
+      return res.status(404).json({ success: false, error: 'Inventory item not found' });
+    }
+
+    const newStock = item.target_stock || (item.stock_level + 100);
+    const newStatus = 'HEALTHY';
+
+    if (db) {
+      db.prepare('UPDATE inventory SET stock_level = ?, status = ? WHERE sku = ?').run(newStock, newStatus, item.sku);
+      // Update PO status to DELIVERED
+      const latestPo = db.prepare('SELECT * FROM purchase_orders WHERE sku = ? ORDER BY created_at DESC LIMIT 1').get(item.sku);
+      if (latestPo) {
+        db.prepare('UPDATE purchase_orders SET status = ? WHERE id = ?').run('DELIVERED', latestPo.id);
+      }
+    } else {
+      item.stock_level = newStock;
+      item.status = newStatus;
+      const latestPo = [...memoryStore.purchase_orders].reverse().find(po => po.sku === item.sku);
+      if (latestPo) {
+        latestPo.status = 'DELIVERED';
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Shipment received for ${item.name} (${item.sku}). Stock replenished to ${newStock} units.`,
+      item: { ...item, stock_level: newStock, status: newStatus }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Reset demo data
 router.post('/inventory/reset', authenticateToken, (req, res) => {
   try {

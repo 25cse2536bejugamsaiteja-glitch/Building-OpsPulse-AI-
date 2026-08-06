@@ -153,10 +153,19 @@ export const db = {
             supabaseClient.from('agent_logs').insert(log).then(({ error }) => { if (error) console.warn('Supabase insert agent_logs warning:', error.message); });
           }
         } else if (q.includes('UPDATE INVENTORY SET STATUS =')) {
-          const item = store.inventory.find(i => i.id === args[1]);
+          const item = store.inventory.find(i => i.id === args[1] || i.sku === args[1]);
           if (item) item.status = args[0];
           if (supabaseClient) {
-            supabaseClient.from('inventory').update({ status: args[0] }).eq('id', args[1]).then(({ error }) => { if (error) console.warn('Supabase update inventory warning:', error.message); });
+            supabaseClient.from('inventory').update({ status: args[0] }).or(`id.eq.${args[1]},sku.eq.${args[1]}`).then(({ error }) => { if (error) console.warn('Supabase update inventory warning:', error.message); });
+          }
+        } else if (q.includes('UPDATE INVENTORY SET STOCK_LEVEL =')) {
+          const item = store.inventory.find(i => i.id === args[2] || i.sku === args[2] || i.id === args[1] || i.sku === args[1]);
+          if (item) {
+            item.stock_level = Number(args[0]);
+            item.status = args[1];
+          }
+          if (supabaseClient) {
+            supabaseClient.from('inventory').update({ stock_level: Number(args[0]), status: args[1] }).or(`id.eq.${args[2]},sku.eq.${args[2]}`).then(({ error }) => { if (error) console.warn('Supabase update inventory stock warning:', error.message); });
           }
         } else if (q.includes('DELETE FROM INVENTORY')) {
           store.inventory = [];

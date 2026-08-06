@@ -18,8 +18,30 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Response Interceptor: Redirect to login on token failure
-api.interceptors.response.use((response) => response, (error) => {
+// Response Interceptor: Support retry with direct backend URL if proxy fails, and handle auth redirects
+api.interceptors.response.use((response) => response, async (error) => {
+  const originalRequest = error.config;
+  if (
+    originalRequest &&
+    !originalRequest._retry &&
+    (error.code === 'ERR_NETWORK' || error.response?.status === 404) &&
+    originalRequest.url &&
+    !originalRequest.url.startsWith('http')
+  ) {
+    originalRequest._retry = true;
+    try {
+      const cleanUrl = originalRequest.url.startsWith('/') ? originalRequest.url : `/${originalRequest.url}`;
+      const fallbackUrl = `http://localhost:5000/api${cleanUrl}`;
+      const fallbackResponse = await axios({
+        ...originalRequest,
+        url: fallbackUrl
+      });
+      return fallbackResponse;
+    } catch (fallbackErr) {
+      return Promise.reject(fallbackErr);
+    }
+  }
+
   if (error.response && (error.response.status === 401 || error.response.status === 403)) {
     // If not already on login page
     if (!window.location.pathname.includes('/login')) {

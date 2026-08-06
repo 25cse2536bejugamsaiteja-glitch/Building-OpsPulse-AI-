@@ -19,13 +19,21 @@ app.use(express.json());
 // Seed data initialization
 seedInitialData();
 
-// Routes
+// Routes - supporting route aliases for high availability & compatibility
 app.use('/api/auth', authRoutes);
+app.use('/api', authRoutes); // Aliases for /api/login, /api/register, /api/me
+app.use('/auth', authRoutes); // Aliases for /auth/login, /auth/register
+app.use('/login', authRoutes);
+app.use('/register', authRoutes);
+
 app.use('/api', inventoryRoutes);
+app.use('/inventory', inventoryRoutes);
+
 app.use('/api/agent', agentRoutes);
+app.use('/agent', agentRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get(['/', '/health', '/api/health'], (req, res) => {
   res.json({
     status: 'online',
     service: 'OpsPulse AI Engine',

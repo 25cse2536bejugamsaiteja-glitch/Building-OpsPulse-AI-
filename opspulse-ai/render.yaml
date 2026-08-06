@@ -1,0 +1,32 @@
+services:
+  # Frontend Static Site
+  - type: web
+    name: opspulse-ai-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://opspulse-ai-backend.onrender.com/api
+      - key: VITE_APP_TITLE
+        value: OpsPulse AI — Autonomous Supply Chain & Procurement Agent
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # Backend Node.js Web Service
+  - type: web
+    name: opspulse-ai-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node src/server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false

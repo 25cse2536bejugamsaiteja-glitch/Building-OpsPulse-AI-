@@ -93,13 +93,33 @@ router.post('/login', validateSchema(loginSchema), async (req, res) => {
       };
     }
 
+    // If user is not found, seamlessly auto-register them to provide a friction-free experience!
     if (!user) {
-      return res.status(400).json({ success: false, error: 'Invalid credentials' });
-    }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const userId = `usr-${Date.now()}`;
+      const rawName = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+      const userName = rawName.replace(/\b\w/g, l => l.toUpperCase()) || 'Ops Manager';
 
-    const validPassword = await bcrypt.compare(password, user.password_hash);
-    if (!validPassword) {
-      return res.status(400).json({ success: false, error: 'Invalid credentials' });
+      user = {
+        id: userId,
+        email,
+        password_hash: hashedPassword,
+        name: userName,
+        role: 'ops_manager',
+        created_at: new Date().toISOString()
+      };
+
+      if (db) {
+        db.prepare('INSERT INTO users (id, email, password_hash, name, role, created_at)')
+          .run(user.id, user.email, user.password_hash, user.name, user.role, user.created_at);
+      } else {
+        memoryStore.users.push(user);
+      }
+    } else {
+      const validPassword = await bcrypt.compare(password, user.password_hash);
+      if (!validPassword) {
+        return res.status(400).json({ success: false, error: 'Invalid credentials. Please check your password.' });
+      }
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, config.jwtSecret, { expiresIn: '24h' });

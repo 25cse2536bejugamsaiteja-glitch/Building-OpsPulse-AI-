@@ -30,9 +30,17 @@ export default function Login({ onLoginSuccess }) {
       }
     } catch (err) {
       console.error('Authentication Error:', err);
-      const serverError = err.response?.data?.error;
-      const networkError = err.message ? `Network Error: ${err.message}` : null;
-      setError(serverError || networkError || 'Authentication failed. Please verify backend URL and credentials.');
+      let errorMsg = err.response?.data?.error;
+      if (!errorMsg) {
+        if (err.response?.status === 404) {
+          errorMsg = 'Backend endpoint not found (404). Please ensure the backend server is running on http://localhost:5000.';
+        } else if (err.code === 'ERR_NETWORK' || !err.response) {
+          errorMsg = 'Cannot connect to backend server. Please start the backend server at http://localhost:5000.';
+        } else {
+          errorMsg = err.message || 'Authentication failed. Please verify credentials.';
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

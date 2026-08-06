@@ -49,19 +49,22 @@ Available Suppliers: ${JSON.stringify(suppliers, null, 2)}
 Operational Trigger: ${prompt}`;
 
   if (genAIInstance) {
-    try {
-      const model = genAIInstance.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        generationConfig: { responseMimeType: 'application/json' }
-      });
+    const candidateModels = ['gemini-flash-latest', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    for (const modelName of candidateModels) {
+      try {
+        const model = genAIInstance.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' }
+        });
 
-      const response = await model.generateContent(`${systemPrompt}\n\n${userContent}`);
-      const text = response.response.text();
-      if (text) {
-        return JSON.parse(text);
+        const response = await model.generateContent(`${systemPrompt}\n\n${userContent}`);
+        const text = response.response.text();
+        if (text) {
+          return JSON.parse(text);
+        }
+      } catch (err) {
+        console.warn(`Gemini model ${modelName} warning:`, err.message);
       }
-    } catch (err) {
-      console.warn('Gemini API call warning (using fallback logic):', err.message);
     }
   }
 

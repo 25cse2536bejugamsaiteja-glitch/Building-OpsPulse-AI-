@@ -19,10 +19,8 @@ build/
 out/
 
 # Database & Persistent Data
-backend/data/
 *.db
 *.sqlite
-db_store.json
 
 # IDE & System Files
 .DS_Store

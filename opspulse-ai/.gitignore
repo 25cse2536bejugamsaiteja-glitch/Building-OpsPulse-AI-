@@ -14,7 +14,3 @@ node_modules/
 
 # Build Outputs
 dist/
-
-# Local Data
-backend/data/
-db_store.json

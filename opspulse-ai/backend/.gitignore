@@ -9,7 +9,3 @@
 
 # Dependencies
 node_modules/
-
-# Local Data
-data/
-db_store.json

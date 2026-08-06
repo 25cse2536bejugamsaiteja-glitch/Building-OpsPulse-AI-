@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  // Default to deployed Render backend web service if running on cloud static host
+  if (typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+    return 'https://opspulse-ai-backend.onrender.com/api';
+  }
+  return '/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: getBaseUrl(),
   headers: {
     'Content-Type': 'application/json'
   }
@@ -19,7 +30,15 @@ api.interceptors.request.use((config) => {
 });
 
 // Response Interceptor: Support retry with direct backend URL if proxy fails, and handle auth redirects
-api.interceptors.response.use((response) => response, async (error) => {
+api.interceptors.response.use((response) => {
+  // Catch HTML responses returned by SPA fallback rewrite rules when JSON API was expected
+  if (typeof response.data === 'string' && response.data.trim().toLowerCase().startsWith('<!doctype html')) {
+    const htmlError = new Error('SPA rewrite returned HTML index page instead of JSON API response');
+    htmlError.response = { ...response, status: 404 };
+    return Promise.reject(htmlError);
+  }
+  return response;
+}, async (error) => {
   const originalRequest = error.config;
   if (
     originalRequest &&
@@ -31,7 +50,9 @@ api.interceptors.response.use((response) => response, async (error) => {
     originalRequest._retry = true;
     try {
       const cleanUrl = originalRequest.url.startsWith('/') ? originalRequest.url : `/${originalRequest.url}`;
-      const fallbackUrl = `http://localhost:5000/api${cleanUrl}`;
+      const isCloud = typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
+      const fallbackBase = isCloud ? 'https://opspulse-ai-backend.onrender.com/api' : 'http://localhost:5000/api';
+      const fallbackUrl = `${fallbackBase}${cleanUrl}`;
       const fallbackResponse = await axios({
         ...originalRequest,
         url: fallbackUrl
